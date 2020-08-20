@@ -1,6 +1,6 @@
-;Program:       Assignment 1
-;Author:        Dylan Richards
-;Due Date:      8/30/2020
+; Program:      Assignment 1
+; Author:       Dylan Richards
+; Due Date:     8/30/2020
 
 ; R[0] 0
 ; R[1] user input for array
@@ -14,22 +14,14 @@
         mov 7 1         ; Move 1 to R[7]
 
 #INPT:  rdn 1           ; Read input to R[1]
-        beq 1 0 #AI     ; if input = 0 goto AI
+        beq 1 0 #LOAD   ; if input = 0 goto AI
         str 2 0 1       ; Store R[1] into M[index]
         add 2 2 7       ; increment index
         jmp 0 #INPT     ; Get more input
 
-#AI:    rdn 3           ; Read input to R[3]
+#LOAD:  rdn 3           ; Read input to R[3]
         rdn 4           ; Read input to R[4]
-        blt 3 2 #AJ     ; if R[3] < max index check R[4]
-        jmp 0 #OOB      ; jmp to out of bounds error
-
-#AJ:    blt 4 2 #LOAD   ; if R[4] < max index, goto load
-
-#OOB:   jmp 0 #PRNT     ; print after out of bounds
-
-#LOAD:  lod 3 3 0       ; Load R[3] from M[R[3]]
-        add 6 3 0       ; Remainder set to A[i]
+        lod 6 3 0       ; Load R[6] from M[R[3]]
         lod 4 4 0       ; Load R[4] from M[R[4]]
 
 #DIV:   blt 6 4 #PRNT   ; if remainder less than A[j]
@@ -39,5 +31,5 @@
 
 #PRNT:  ptn 5           ; print quotient
         ptn 6           ; print remainder
-        
+
         hlt 0           ; exit with code 0
