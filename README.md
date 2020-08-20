@@ -16,3 +16,4 @@ Example:
 $ cd assignment1
 $ ../sim-dism/sim-dism qr.dism
 ```
+#### Make sure the DISM file has an empty line at the end. Simulator will not work otherwise!
