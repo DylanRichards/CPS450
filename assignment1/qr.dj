@@ -1,0 +1,98 @@
+// Program:     Assignment 1
+// Author:      Dylan Richards
+// Due Date:    8/30/2020
+
+//Reads natural numbers, prepending them into a linked list. 
+//Stops reading after a 0 is read.  At that point, the list is printed.
+
+//The net effect is that a list of numbers gets printed in the
+//reverse order from which they were read.
+
+class LinkedList extends Object {
+  nat data;  //content of a list node
+  LinkedList next; //(implicit pointer to) the remainder of the list
+  
+  //set the data value in the list's head node to newData
+  //returns newData
+  nat setData(nat newData) { data=newData; }
+
+  //prepend a new node to the list 
+  //the new node will contain the newData 
+  //always returns 0
+  nat prepend(nat newData) {
+    LinkedList currList;
+    currList = new LinkedList();
+    currList.data = data;
+    currList.next = next;
+    data = newData;
+    next = currList;
+    0;
+  }
+
+  nat get(nat index){
+    LinkedList tmpList;
+    tmpList = new LinkedList();
+    tmpList.data = data;
+    tmpList.next = next;
+    
+    nat currentIndex;
+
+    while(!(index == currentIndex)){
+      tmpList = next;
+      currentIndex = currentIndex + 1;
+    };
+
+    data;
+  }
+
+  //print the list
+  //always returns 0
+  nat printList() {
+    //print the data in this list node
+    printNat(data);
+    //if there's more to the list, recursively print the remainder 
+    if(next==null) {0;}
+    else {next.printList();};
+  }
+}
+
+main {
+  nat input;
+  nat len;
+  nat i;
+  nat j;
+  nat ai;
+  nat aj;
+  nat quotient;
+  nat remainder;
+
+  //create a linked list
+  LinkedList ll;
+  ll = new LinkedList();
+
+  //read data into the list
+  input = readNat();
+  ll.setData(input);
+  while(!(input==0)) {
+    input = readNat();
+    ll.prepend(input);
+    len = len + 1;
+  };
+
+  i = readNat();
+  j = readNat();
+
+  // Flip the index since list is prepended
+  len = len - 1;
+  i = len - i;
+  j = len - j;
+
+  ai = ll.get(i);
+  aj = ll.get(j);
+
+  // TODO: quotient = ai/aj
+  // TODO: remainder = ai%aj
+
+  printNat(quotient);
+  printNat(remainder);
+}
