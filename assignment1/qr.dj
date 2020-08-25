@@ -38,11 +38,11 @@ class LinkedList extends Object {
     nat currentIndex;
 
     while(!(index == currentIndex)){
-      tmpList = next;
+      tmpList = tmpList.next;
       currentIndex = currentIndex + 1;
     };
 
-    data;
+    tempList.data;
   }
 
   //print the list
