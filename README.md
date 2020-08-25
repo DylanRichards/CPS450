@@ -3,7 +3,7 @@ CPS 450 Assignments
 
 ## Simulate DISM Program
 
-To run a DISM program complile the simulater (you only need to do this once):
+To run a DISM program compile the simulater (you only need to do this once):
 ```console
 $ cd sim-dism
 $ flex dism.l
