@@ -42,7 +42,7 @@ class LinkedList extends Object {
       currentIndex = currentIndex + 1;
     };
 
-    tempList.data;
+    tmpList.data;
   }
 
   //print the list
@@ -63,8 +63,8 @@ main {
   nat j;
   nat ai;
   nat aj;
-  nat quotient;
-  nat remainder;
+  nat q;
+  nat r;
 
   //create a linked list
   LinkedList ll;
@@ -90,9 +90,17 @@ main {
   ai = ll.get(i);
   aj = ll.get(j);
 
-  // TODO: quotient = ai/aj
-  // TODO: remainder = ai%aj
+  if(aj == 0){
+    printNat(0);
+    printNat(0);
+  } else {
+    r = ai;
+    while(!(r<aj)){
+      r = r - aj;
+      q++;
+    };
+    printNat(q);
+    printNat(r);
+  };
 
-  printNat(quotient);
-  printNat(remainder);
 }
