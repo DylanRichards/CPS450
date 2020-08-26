@@ -97,7 +97,7 @@ main {
     r = ai;
     while(!(r<aj)){
       r = r - aj;
-      q++;
+      q = q + 1;
     };
     printNat(q);
     printNat(r);
