@@ -3,10 +3,9 @@
 // Due Date:    8/30/2020
 
 //Reads natural numbers, prepending them into a linked list. 
-//Stops reading after a 0 is read.  At that point, the list is printed.
-
-//The net effect is that a list of numbers gets printed in the
-//reverse order from which they were read.
+//Stops reading after a 0 is read.
+//Reads two more numbers used for the indices
+//Divides and prints the quotient and remainder
 
 class LinkedList extends Object {
   nat data;  //content of a list node
