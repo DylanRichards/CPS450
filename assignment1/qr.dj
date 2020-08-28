@@ -90,6 +90,7 @@ main {
   ai = ll.get(i);
   aj = ll.get(j);
 
+  // Compute ai/aj with remainder
   if(aj == 0){
     printNat(0);
     printNat(0);
