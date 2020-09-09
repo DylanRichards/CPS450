@@ -28,12 +28,12 @@ this        {return scanned(THIS);}
 new         {return scanned(NEW);}
 null        {return scanned(NUL);}
 
-"="        {return scanned(ASSIGN);}
-"+"        {return scanned(PLUS);}
-"-"        {return scanned(MINUS);}
-"*"        {return scanned(TIMES);}
-"=="       {return scanned(EQUALITY);}
-"<"        {return scanned(LESS);}
+"="         {return scanned(ASSIGN);}
+"+"         {return scanned(PLUS);}
+"-"         {return scanned(MINUS);}
+"*"         {return scanned(TIMES);}
+"=="        {return scanned(EQUALITY);}
+"<"         {return scanned(LESS);}
 
 "&&"        {return scanned(AND);}
 "!"         {return scanned(NOT);}
