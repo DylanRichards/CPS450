@@ -6,9 +6,7 @@ CPS 450 Assignments
 To run a DISM program compile the simulater (you only need to do this once):
 ```console
 $ cd sim-dism
-$ flex dism.l
-$ yacc dism.y
-$ gcc -w dism.tab.c ast.c interp.c -osim-dism
+$ make
 ```
 Then execute sim-dism with the DISM file you want to run as the parameter.
 Example:
