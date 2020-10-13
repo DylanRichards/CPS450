@@ -45,12 +45,13 @@ class_decl_list:
 ;
 
 class_decl:
-      CLASS ID EXTENDS ID LBRACE var_decl_list method_decl_list RBRACE
+      CLASS id_exp EXTENDS id_exp LBRACE var_decl_list method_decl_list RBRACE
+    | CLASS id_exp EXTENDS id_exp LBRACE var_decl_list RBRACE
 ;
 
 method_decl_list:
-      method_decl method_decl_list
-    |
+      method_decl_list method_decl
+    | method_decl
 ;
 
 method_decl:
@@ -68,8 +69,8 @@ par_dec:
 ;
 
 par:
-      NATTYPE ID
-    | ID ID
+      ntyp id_exp
+    | id_exp id_exp
 ;
 
 var_exp_block:
@@ -82,8 +83,8 @@ var_decl_list:
 ;
 
 var_decl:
-      NATTYPE ID
-    | ID ID
+      ntyp id_exp
+    | id_exp id_exp
 ;
 
 exp_list:
@@ -103,16 +104,16 @@ exp:
     | NUL
     | IF LPAREN exp RPAREN LBRACE exp_list RBRACE ELSE LBRACE exp_list RBRACE
     | WHILE LPAREN exp RPAREN LBRACE exp_list RBRACE
-    | NEW ID LPAREN RPAREN
+    | NEW id_exp LPAREN RPAREN
     | THIS
     | PRINTNAT LPAREN exp RPAREN
     | READNAT LPAREN RPAREN
-    | ID
-    | exp DOT ID
-    | ID ASSIGN exp
-    | exp DOT ID ASSIGN exp
-    | ID LPAREN arg_list RPAREN
-    | exp DOT ID LPAREN arg_list RPAREN
+    | id_exp
+    | exp DOT id_exp
+    | id_exp ASSIGN exp
+    | exp DOT id_exp ASSIGN exp
+    | id_exp LPAREN arg_list RPAREN
+    | exp DOT id_exp LPAREN arg_list RPAREN
     | LPAREN exp RPAREN
 ;
 
@@ -124,8 +125,16 @@ arg_list:
 arg:
       arg COMMA exp
     | exp
-; 
+;
       
+id_exp:
+      ID
+;
+
+ntyp:
+      NATTYPE
+;
+
 
 %%
 
