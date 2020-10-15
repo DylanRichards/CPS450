@@ -64,13 +64,8 @@ par_dec_list:
 ;
 
 par_dec:
-      par_dec COMMA par
-    | par
-;
-
-par:
-      ntyp id_exp
-    | id_exp id_exp
+      par_dec COMMA var_decl
+    | var_decl
 ;
 
 var_exp_block:
