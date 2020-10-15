@@ -35,20 +35,14 @@
 
 %%
 
-pgm: class_decl_list main_decl ENDOFFILE
+pgm: class_decl_list MAIN LBRACE var_decl_list exp_list RBRACE ENDOFFILE
     {
       $$ = newAST(PROGRAM, $1, 0, NULL, yylineno);
-      appendToChildrenList($$, $2);
+      appendToChildrenList($$, $4);
+      appendToChildrenList($$, $5);
       pgmAST = $$;
       return 0;
     }
-;
-
-main_decl:
-      MAIN var_exp_block
-        {
-          $$ = newAST(MAIN_DECL, $2, 0, NULL, yylineno);
-        }
 ;
 
 class_decl_list:
@@ -90,11 +84,12 @@ method_decl_list:
 ;
 
 method_decl:
-      var_decl LPAREN par_dec_list RPAREN var_exp_block
+      var_decl LPAREN par_dec_list RPAREN LBRACE var_decl_list exp_list RBRACE
         {
           $$ = newAST(METHOD_DECL, $1, 0, NULL, yylineno);
           appendToChildrenList($$, $3);
-          appendToChildrenList($$, $5);
+          appendToChildrenList($$, $6);
+          appendToChildrenList($$, $7);
         }
 ;
 
@@ -117,14 +112,6 @@ par_dec:
     | var_decl
         {
           $$ = newAST(PARAM_DECL, $1, 0, NULL, yylineno);
-        }
-;
-
-var_exp_block:
-      LBRACE var_decl_list exp_list RBRACE
-        {
-          $$ = newAST(VAR_EXP_BLOCK, $2, 0, NULL, yylineno);
-          appendToChildrenList($$, $3);
         }
 ;
 

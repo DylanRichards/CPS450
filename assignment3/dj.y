@@ -31,12 +31,8 @@
 
 %%
 
-pgm: class_decl_list main_decl ENDOFFILE
+pgm: class_decl_list MAIN LBRACE var_decl_list exp_list RBRACE ENDOFFILE
     {return 0;}
-;
-
-main_decl:
-      MAIN var_exp_block
 ;
 
 class_decl_list:
@@ -55,7 +51,7 @@ method_decl_list:
 ;
 
 method_decl:
-      var_decl LPAREN par_dec_list RPAREN var_exp_block
+      var_decl LPAREN par_dec_list RPAREN LBRACE var_decl_list exp_list RBRACE 
 ;
 
 par_dec_list:
@@ -66,10 +62,6 @@ par_dec_list:
 par_dec:
       par_dec COMMA var_decl
     | var_decl
-;
-
-var_exp_block:
-      LBRACE var_decl_list exp_list RBRACE 
 ;
 
 var_decl_list:

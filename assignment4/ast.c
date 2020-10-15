@@ -60,8 +60,6 @@ void printNodeTypeAndAttribute(ASTree *t) {
     case PROGRAM: printf("PROGRAM"); break;
     case CLASS_DECL_LIST: printf("CLASS_DECL_LIST"); break;
     case CLASS_DECL: printf("CLASS_DECL"); break;
-    case MAIN_DECL: printf("MAIN_DECL"); break;
-    case VAR_EXP_BLOCK: printf("VAR_EXP_BLOCK"); break;
     case VAR_DECL_LIST: printf("VAR_DECL_LIST"); break;
     case VAR_DECL: printf("VAR_DECL"); break;
     case METHOD_DECL_LIST: printf("METHOD_DECL_LIST"); break;
