@@ -36,3 +36,8 @@ $ ../sim-dism/sim-dism qr.dism
 2. To understand the format of abstract syntax trees (ASTs) in DISM and DJ.
 3. To implement an AST-building parser for DJ programs.
 4. To practice writing semantic actions in bison CFGs.
+
+## Assignment 5
+1. To learn basic typing rules (i.e., static semantics) for an object-oriented language with inheritance and subtyping.
+2. To implement an enhanced symbol table for Diminished Java (DJ) programs.
+3. To implement a type checker for DJ programs.
