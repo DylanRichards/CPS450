@@ -16,6 +16,19 @@
 
 /* =========== HELPER METHODS =========== */
 
+void checkVarDeclList(VarDecl *mainBlockST, int numMainBlockLocals){
+	int i, j;
+	for (i = 0; i < numMainBlockLocals - 1; i++){
+		VarDecl *varDecl = &mainBlockST[i];
+
+		for (j = i+1; j < numMainBlockLocals; j++){
+			VarDecl *varDecl2 = &mainBlockST[j];
+			if(strcmp(varDecl->varName, varDecl2->varName) == 0){
+				printSemanticError("Var declared multiple times", varDecl->varNameLineNumber);
+			}
+		}
+	}
+}
 
 int hasCycle(int cType) {
 	ClassDecl *classDecl = &classesST[cType];
@@ -126,7 +139,7 @@ void typecheckProgram() {
 	/* === Level 3 === */
 	//checkClasses();
 	/* === Level 2 === */
-	//checkVarDeclList(mainBlockST, numMainBlockLocals);
+	checkVarDeclList(mainBlockST, numMainBlockLocals);
 	/* === Level 1 === */
 	/* typecheck the main block expressions */
 	typeExprs(mainExprs, -1, -1);
@@ -150,15 +163,21 @@ int typeExpr(ASTree *t, int classContainingExpr, int methodContainingExpr) {
 		return NULL_TYPE;
 	} else if (t->typ == PRINT_EXPR) {
         // level 1
+		int t1 = typeExpr(t->children->data, classContainingExpr, methodContainingExpr);
+
+        if (t1 != NAT_TYPE) {
+            printSemanticError("non-nat type in print", t->lineNumber);
+        }
+        
+        return NAT_TYPE;
 	} else if (t->typ == READ_EXPR) {
         // level 1
+		return NAT_TYPE;
 	} else if (t->typ == PLUS_EXPR) {
         // level 1
-        // typeExpr returns the type of the examing node
         int t1 = typeExpr(t->children->data, classContainingExpr, methodContainingExpr);
         int t2 = typeExpr(t->children->next->data, classContainingExpr, methodContainingExpr);
 
-        // for plus operation, the two operands must be nat type, otherwise, print an error message
         if (t1 != NAT_TYPE || t2 != NAT_TYPE) {
             printSemanticError("non-nat type in plus", t->lineNumber);
         }
@@ -166,28 +185,102 @@ int typeExpr(ASTree *t, int classContainingExpr, int methodContainingExpr) {
         return NAT_TYPE;
     } else if (t->typ == MINUS_EXPR) {
         // level 1
+        int t1 = typeExpr(t->children->data, classContainingExpr, methodContainingExpr);
+        int t2 = typeExpr(t->children->next->data, classContainingExpr, methodContainingExpr);
+
+        if (t1 != NAT_TYPE || t2 != NAT_TYPE) {
+            printSemanticError("non-nat type in minus", t->lineNumber);
+        }
+        
+        return NAT_TYPE;
 	} else if (t->typ == TIMES_EXPR) {
         // level 1
+        int t1 = typeExpr(t->children->data, classContainingExpr, methodContainingExpr);
+        int t2 = typeExpr(t->children->next->data, classContainingExpr, methodContainingExpr);
+
+        if (t1 != NAT_TYPE || t2 != NAT_TYPE) {
+            printSemanticError("non-nat type in times", t->lineNumber);
+        }
+        
+        return NAT_TYPE;
 	} else if (t->typ == LESS_THAN_EXPR) {
         // level 1
+        int t1 = typeExpr(t->children->data, classContainingExpr, methodContainingExpr);
+        int t2 = typeExpr(t->children->next->data, classContainingExpr, methodContainingExpr);
+
+        if (t1 != NAT_TYPE || t2 != NAT_TYPE) {
+            printSemanticError("non-nat type in less than", t->lineNumber);
+        }
+        
+        return NAT_TYPE;
 	} else if (t->typ == AND_EXPR) {
         // level 1
+        int t1 = typeExpr(t->children->data, classContainingExpr, methodContainingExpr);
+        int t2 = typeExpr(t->children->next->data, classContainingExpr, methodContainingExpr);
+
+        if (t1 != NAT_TYPE || t2 != NAT_TYPE) {
+            printSemanticError("non-nat type in and", t->lineNumber);
+        }
+        
+        return NAT_TYPE;
 	} else if (t->typ == NOT_EXPR) {
         // level 1
+        int t1 = typeExpr(t->children->data, classContainingExpr, methodContainingExpr);
+
+        if (t1 != NAT_TYPE) {
+            printSemanticError("non-nat type in not", t->lineNumber);
+        }
+        
+        return NAT_TYPE;
 	} else if (t->typ == EQUALITY_EXPR) {
         // level 1
+        int t1 = typeExpr(t->children->data, classContainingExpr, methodContainingExpr);
+        int t2 = typeExpr(t->children->next->data, classContainingExpr, methodContainingExpr);
+
+        if (t1 != NAT_TYPE || t2 != NAT_TYPE) {
+            printSemanticError("non-nat type in equality", t->lineNumber);
+        }
+        
+        return NAT_TYPE;
 	} else if (t->typ == IF_THEN_ELSE_EXPR) {
         // level 1
+		int t1 = typeExpr(t->children->data, classContainingExpr, methodContainingExpr);
+		int t2 = typeExpr(t->children->next->data, classContainingExpr, methodContainingExpr);
+		int t3 = typeExpr(t->children->next->next->data, classContainingExpr, methodContainingExpr);
+
+        if (t1 == NAT_TYPE && join(t2, t3) != UNDEFINED_TYPE) {
+			return join(t2, t3);
+        }
+
+		printSemanticError("non-nat type in if-else expression", t->lineNumber);        
 	} else if (t->typ == WHILE_EXPR) {
         // level 1
+		int t1 = typeExpr(t->children->data, classContainingExpr, methodContainingExpr);
+
+        if (t1 != NAT_TYPE) {
+            printSemanticError("non-nat type in while expression", t->lineNumber);
+        }
+        
+        return NAT_TYPE;
 	} else if (t->typ == ASSIGN_EXPR) {
         // level 2
+		if(t->children->data->typ != AST_ID){
+			printSemanticError("Non-id type in assignment", t->lineNumber);
+		}
+		int t1 = typeExpr(t->children->data, classContainingExpr, methodContainingExpr);
+		int t2 = typeExpr(t->children->next->data, classContainingExpr, methodContainingExpr);
+
+		if(isSubtype(t1, t2) == TRUE){
+			return t1;
+		}
+		printSemanticError("Type mismatch in assignment", t->lineNumber);
     } else if (t->typ == ID_EXPR) {
         // level 2
+		return typeExpr(t->children->data, classContainingExpr, methodContainingExpr);
     } else if (t->typ == AST_ID) {
         // level 2
         int i;
-        // Examing variablke is in main function
+        // Examing variable is in main function
         if (classContainingExpr < 0 && methodContainingExpr < 0) {
             for (i = 0; i < numMainBlockLocals; i++) {
                 VarDecl *varDecl = &mainBlockST[i];
@@ -196,7 +289,7 @@ int typeExpr(ASTree *t, int classContainingExpr, int methodContainingExpr) {
                 }
             }
         } else {
-        // Examing variablke is in classes
+        // Examing variable is in classes
         // level 3
         }
         printSemanticError("Undeclared var", t->lineNumber);
