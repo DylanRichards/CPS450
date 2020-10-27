@@ -89,12 +89,21 @@ method_decl_list:
 ;
 
 method_decl:
-      var_decl LPAREN par_dec_list RPAREN LBRACE var_decl_list exp_list RBRACE
+      ntyp id_exp LPAREN par_dec_list RPAREN LBRACE var_decl_list exp_list RBRACE
         {
           $$ = newAST(METHOD_DECL, $1, 0, NULL, yylineno);
-          appendToChildrenList($$, $3);
-          appendToChildrenList($$, $6);
+          appendToChildrenList($$, $2);
+          appendToChildrenList($$, $4);
           appendToChildrenList($$, $7);
+          appendToChildrenList($$, $8);
+        }
+    | id_exp id_exp LPAREN par_dec_list RPAREN LBRACE var_decl_list exp_list RBRACE
+        {
+          $$ = newAST(METHOD_DECL, $1, 0, NULL, yylineno);
+          appendToChildrenList($$, $2);
+          appendToChildrenList($$, $4);
+          appendToChildrenList($$, $7);
+          appendToChildrenList($$, $8);
         }
 ;
 
