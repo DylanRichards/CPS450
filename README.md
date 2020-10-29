@@ -41,3 +41,8 @@ $ ../sim-dism/sim-dism qr.dism
 1. To learn basic typing rules (i.e., static semantics) for an object-oriented language with inheritance and subtyping.
 2. To implement an enhanced symbol table for Diminished Java (DJ) programs.
 3. To implement a type checker for DJ programs.
+
+## Assignment 6
+1. To learn basic rules for generating RISC-style machine code equivalent to high-level abstract-syntax trees (ASTs).
+2. To implement a code generator that converts Diminished Java (DJ) ASTs into Diminished Instruction Set Machine (DISM) programs
+3. To test a complete dj2dism compiler.
