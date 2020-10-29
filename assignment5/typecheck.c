@@ -435,6 +435,7 @@ int typeExpr(ASTree *t, int classContainingExpr, int methodContainingExpr) {
 	} else if (t->typ == WHILE_EXPR) {
         // level 1
 		int t1 = typeExpr(t->children->data, classContainingExpr, methodContainingExpr);
+		int t2 = typeExpr(t->children->next->data, classContainingExpr, methodContainingExpr);
 
         if (t1 != NAT_TYPE) {
             printSemanticError("non-nat type in while expression", t->lineNumber);
