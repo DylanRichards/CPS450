@@ -127,24 +127,26 @@ void codeGenExpr(ASTree *t, int classNumber, int methodNumber) {
 		incSP();
 	} else if (t->typ == AND_EXPR) {
         // Level 1
-		int localLabelNumber = labelNumber;
 		codeGenExpr(t->children->data, classNumber, methodNumber);
+		int exitBranchLabel = labelNumber + 1;
 		appendCode("R1 <- M[SP+1]", "%s 1 6 1", LOAD);
-		appendCode("branch R0<R1", "%s 0 1 #%d", BLT, localLabelNumber);
+		appendCode("branch R0<R1", "%s 0 1 #%d", BLT, labelNumber);
 		appendCode("R2 = 0", "%s 2 0", MOVE);
 		appendCode("M[SP+1] <- R[2]", "%s 6 1 2", STORE);
-		appendCode("jump exit branch", "%s 0 #%d", JUMP, localLabelNumber + 1);
-		appendCode("Else label", "#%d: %s 0 0", localLabelNumber, MOVE);
+		appendCode("jump exit branch", "%s 0 #%d", JUMP, exitBranchLabel);
+		appendCode("Else label", "#%d: %s 0 0", labelNumber, MOVE);
+		labelNumber += 2;
 		codeGenExpr(t->children->next->data, classNumber, methodNumber);
 		appendCode("R1 <- M[SP+1]", "%s 1 6 1", LOAD);
-		appendCode("branch R1 == R0", "%s 1 0 #%d", BEQ, localLabelNumber + 2);
+		appendCode("branch R1 == R0", "%s 1 0 #%d", BEQ, labelNumber);
 		appendCode("R2 = 1", "%s 2 1", MOVE);
 		appendCode("M[SP+2] <- R2", "%s 6 2 2", STORE);
 		incSP();
-		appendCode("jump exit branch", "%s 0 #%d", JUMP, localLabelNumber + 1);
-		appendCode("M[SP+2] <- 0", "#%d: %s 6 2 0", localLabelNumber + 2, STORE);
+		appendCode("jump exit branch", "%s 0 #%d", JUMP, exitBranchLabel);
+		appendCode("M[SP+2] <- 0", "#%d: %s 6 2 0", labelNumber, STORE);
 		incSP();
-		appendCode("Exit", "#%d: %s 0 0", localLabelNumber + 1, MOVE);
+		appendCode("Exit", "#%d: %s 0 0", exitBranchLabel, MOVE);
+		labelNumber++;
 	} else if (t->typ == NOT_EXPR) {
         // Level 1
 		codeGenExpr(t->children->data, classNumber, methodNumber);
@@ -159,19 +161,45 @@ void codeGenExpr(ASTree *t, int classNumber, int methodNumber) {
         // Level 1
 		codeGenExpr(t->children->data, classNumber, methodNumber);
 		codeGenExpr(t->children->next->data, classNumber, methodNumber);
-		appendCode("R1 <- M[R6+2]", "%s 1 6 2", LOAD);
-		appendCode("R2 <- M[R6+1]", "%s 2 6 1", LOAD);
+		appendCode("R1 <- M[SP+2]", "%s 1 6 2", LOAD);
+		appendCode("R2 <- M[SP+1]", "%s 2 6 1", LOAD);
 		appendCode("branch R1 == R2", "%s 1 2 #%d", BEQ, labelNumber);
 		appendCode("R3 = 0", "%s 3 0", MOVE);
-		appendCode("jump exit branch", "%s 0 #%d", JUMP, labelNumber+1);
+		appendCode("jump exit branch", "%s 0 #%d", JUMP, labelNumber + 1);
 		appendCode("R3 = 1", "#%d: %s 3 1", labelNumber, MOVE);
-		appendCode("M[SP+2] <- R3", "#%d: %s 6 2 3", labelNumber+1, STORE);
+		appendCode("M[SP+2] <- R3", "#%d: %s 6 2 3", labelNumber + 1, STORE);
 		labelNumber += 2;
 		incSP();
 	} else if (t->typ == IF_THEN_ELSE_EXPR) {
         // Level 1
+		codeGenExpr(t->children->data, classNumber, methodNumber);
+		int elseBranchLabel = labelNumber;
+		appendCode("R1 <- M[SP+1]", "%s 1 6 1", LOAD);
+		appendCode("branch R1 == R0", "%s 1 0 #%d", BEQ, elseBranchLabel);
+		labelNumber++;
+		codeGenExpr(t->children->next->data, classNumber, methodNumber);
+		int exitBranchLabel = labelNumber;
+		appendCode("R2 <- M[SP+1]", "%s 2 6 1", LOAD);
+		appendCode("M[SP+2] <- R2", "%s 6 2 2", STORE);
+		appendCode("jump exit branch", "%s 0 #%d", JUMP, exitBranchLabel);
+		appendCode("Else branch", "#%d: %s 0 0", elseBranchLabel, MOVE);
+		labelNumber++;
+		codeGenExpr(t->children->next->next->data, classNumber, methodNumber);
+		appendCode("R2 <- M[SP+1]", "%s 2 6 1", LOAD);
+		appendCode("M[SP+2] <- R2", "%s 6 2 2", STORE);
+		appendCode("exit branch", "#%d: %s 0 0", exitBranchLabel, MOVE);
+		incSP();
 	} else if (t->typ == WHILE_EXPR) {
 		// Level 1
+		int whileLoopLabel = labelNumber++;
+		appendCode("Begin while loop", "#%d: %s 0 0", whileLoopLabel, MOVE);
+		codeGenExpr(t->children->data, classNumber, methodNumber);
+		int exitBranchLabel = labelNumber++;
+		appendCode("R1 <- M[SP+1]", "%s 1 6 1", LOAD);
+		appendCode("branch R1 == R0", "%s 1 0 #%d", BEQ, exitBranchLabel);
+		codeGenExpr(t->children->next->data, classNumber, methodNumber);
+		appendCode("jump beginning while loop", "%s 0 #%d", JUMP, whileLoopLabel);
+		appendCode("exit branch", "#%d: %s 0 0", exitBranchLabel, MOVE);
 	} else if (t->typ == AST_ID) {
 		// Level 2 & 3
 	} else if (t->typ == ID_EXPR) {
