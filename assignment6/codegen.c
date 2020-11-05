@@ -30,6 +30,40 @@ void codeGenExpr(ASTree *t, int classNumber, int methodNumber);
 void codeGenExprs(ASTree *expList, int classNumber, int methodNumber);
 
 /**
+ * Using th global classesST, calculate the total number of fields,
+ * including inherited fields, in an object of the given type
+ */
+int getNumObjectFields(int type) {
+	int fieldCount = 0;
+	while (type != 0) {
+		ClassDecl *classDecl = &classesST[type];
+		fieldCount += classDecl->numVars;
+		type = classDecl->superclass;
+	}
+	return fieldCount;
+}
+
+/**
+ * returns the index of variable in class
+ */
+int findFieldOrder(int type, char *id) {
+	int i = 0;
+	int fieldCount = 0;
+	while (type != 0) {
+		ClassDecl *classDecl = &classesST[type];
+		for (i = 0; i < classDecl->numVars; i++) {
+			VarDecl *varDecl = &classDecl->varList[i];
+			if (strcmp(varDecl->varName, id) == 0) {
+				return fieldCount + i;
+			}
+		}
+		fieldCount += classDecl->numVars;
+		type = classDecl->superclass;
+	}
+	return -1;
+}
+
+/**
  * Appends code to fout with params
  */
 void appendCode(char *comment, char *code, ...) {
@@ -202,18 +236,104 @@ void codeGenExpr(ASTree *t, int classNumber, int methodNumber) {
 		appendCode("exit branch", "#%d: %s 0 0", exitBranchLabel, MOVE);
 	} else if (t->typ == AST_ID) {
 		// Level 2 & 3
+		int i;
+		if (classNumber < 0 && methodNumber < 0) {
+			// Level 2
+			for (i = 0; i < numMainBlockLocals; i++) {
+				VarDecl *varDecl = &mainBlockST[i];
+				if (strcmp(varDecl->varName, t->idVal) == 0){
+					appendCode("R1 = numMainBlockLocals", "%s 1 %d", MOVE, numMainBlockLocals);
+					appendCode("R2 = i", "%s 2 %d", MOVE, i);
+					appendCode("R1 = R1-R2", "%s 1 1 2", SUB);
+					appendCode("R1(Address) = FP+R1", "%s 1 1 7", ADD);
+					appendCode("R1 <- M[R1]", "%s 1 1 0", LOAD);
+					appendCode("M[SP] = R1", "%s 6 0 1", STORE);
+					decSP();
+				}
+			}
+		} else {
+			// Level 3
+		}
+		
 	} else if (t->typ == ID_EXPR) {
 		// Level 2
+		codeGenExpr(t->children->data, classNumber, methodNumber);
 	} else if (t->typ == NEW_EXPR) {
 		// Level 3
+		char *idName = t->children->data->idVal;
+		int idType = typeNameToNumber(idName);
+		int fieldCount = getNumObjectFields(idType);
+
+		appendCode("R1 = fieldCount", "%s 1 %d", MOVE, fieldCount);
+		appendCode("R2 = 1", "%s 2 %d", MOVE, 1);
+		appendCode("R3 = 0", "%s 3 %d", MOVE, 0);
+		appendCode("branch R3 == R1", "#%d: %s 1 3 #%d", labelNumber, BEQ, labelNumber + 1);
+		appendCode("str 5 0 0", "%s 5 0 0", STORE);
+		appendCode("HP++", "%s 5 5 2", ADD);
+		appendCode("R3++", "%s 3 3 2", ADD);
+		appendCode("jump to loop", "%s 0 #%d", JUMP, labelNumber);
+		appendCode("exit branch", "#%d: %s 0 0", labelNumber + 1, MOVE);
+		appendCode("R1 = idType", "%s 1 %d", MOVE, idType);
+		appendCode("str 5 0 1", "%s 5 0 1", STORE);
+		appendCode("M[R6] = HP", "%s 6 0 5", STORE);
+		appendCode("HP++", "%s 5 5 2", ADD);
+		labelNumber += 2;
+		decSP();
 	} else if (t->typ == THIS_EXPR) {
 		// Level 3
 	} else if (t->typ == ASSIGN_EXPR) {
 		// Level 2 & 3
+		codeGenExpr(t->children->next->data, classNumber, methodNumber);
+		appendCode("R3 = Right operand", "%s 3 6 1", LOAD);
+		int i;
+		if (classNumber < 0 && methodNumber < 0) {
+			// Level 2
+			for (i = 0; i < numMainBlockLocals; i++) {
+				VarDecl *varDecl = &mainBlockST[i];
+				if (strcmp(varDecl->varName, t->children->data->idVal) == 0){
+					appendCode("R1 = numMainBlockLocals", "%s 1 %d", MOVE, numMainBlockLocals);
+					appendCode("R2 = i", "%s 2 %d", MOVE, i);
+					appendCode("R1 = R1-R2", "%s 1 1 2", SUB);
+					appendCode("R1(Address) = FP+R1", "%s 1 1 7", ADD);
+					break;
+				}
+			}
+			appendCode("M[R1] = R3", "%s 1 0 3", STORE);
+		} else {
+			// Level 3
+		}
 	} else if (t->typ == DOT_ID_EXPR) {
 		// Level 3
+		codeGenExpr(t->children->data, classNumber, methodNumber);
+
+		int t1 = t->staticClassNum;
+		int fieldCount = getNumObjectFields(t1);
+		int ithField = findFieldOrder(t1, t->children->next->data->idVal);
+
+		appendCode("R1 = numMains", "%s 1 %d", MOVE, fieldCount);
+		appendCode("R2 = i", "%s 2 %d", MOVE, ithField);
+		appendCode("R3 <- M[SP+1]", "%s 3 6 1", LOAD);
+		appendCode("R1 = R3 - R1", "%s 1 3 1", SUB);
+		appendCode("R1 = R1 + R2", "%s 1 1 2", ADD);
+		appendCode("R1 <- M[R1]", "%s 1 1 0", LOAD);
+		appendCode("M[SP+1] = R1 (id val)", "%s 6 1 1", STORE);
 	} else if (t->typ == DOT_ASSIGN_EXPR) {
 		// Level 3
+		codeGenExpr(t->children->next->next->data, classNumber, methodNumber);
+		codeGenExpr(t->children->data, classNumber, methodNumber);
+
+		int t1 = t->staticClassNum;
+		int fieldCount = getNumObjectFields(t1);
+		int ithField = findFieldOrder(t1, t->children->next->data->idVal);
+
+		appendCode("R1 = numMains", "%s 1 %d", MOVE, fieldCount);
+		appendCode("R2 = i", "%s 2 %d", MOVE, ithField);
+		appendCode("R3 <- M[SP+1]", "%s 3 6 1", LOAD);
+		appendCode("R1 = R3 - R1", "%s 1 3 1", SUB);
+		appendCode("R1 = R1 + R2", "%s 1 1 2", ADD);
+		appendCode("R4 <- M[SP+2]", "%s 4 6 2", LOAD);
+		appendCode("M[R1] = R4 (id val)", "%s 1 0 4", STORE);
+		incSP();
 	} else if (t->typ == METHOD_CALL_EXPR) {
 		// Level 3
     } else if (t->typ == DOT_METHOD_CALL_EXPR) {
