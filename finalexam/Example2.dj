@@ -1,0 +1,6 @@
+main {
+    nat i;
+    nat j;
+    j = 9;
+    printNat(i + j++);
+}
