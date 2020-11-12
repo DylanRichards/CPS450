@@ -22,6 +22,7 @@
 %token ID ASSIGN PLUS MINUS TIMES EQUALITY LESS
 %token AND NOT SEMICOLON LBRACE RBRACE
 %token LPAREN RPAREN ENDOFFILE
+%token INCREMENT DECREMENT FOR
 
 %start pgm
 
@@ -32,6 +33,8 @@
 %left PLUS MINUS
 %left TIMES
 %right NOT
+%left INCREMENT
+%left DECREMENT
 
 %%
 
@@ -65,7 +68,22 @@ expr_list : expr_list exp SEMICOLON
            {$$ = newAST(EXPR_LIST, $1, 0, NULL, yylineno);}
           ;
 
-exp : exp PLUS exp
+exp : id_exp INCREMENT
+      {
+        $$ = newAST(INCREMENT_EXPR, $1, 0, NULL, yylineno);
+      }
+    | id_exp DECREMENT
+      {
+        $$ = newAST(DECREMENT_EXPR, $1, 0, NULL, yylineno);
+      }
+    | FOR LPAREN exp SEMICOLON exp SEMICOLON exp RPAREN LBRACE expr_list RBRACE
+      {
+        $$ = newAST(FOR_EXPR, $3, 0, NULL, yylineno);
+        appendToChildrenList($$, $5);
+        appendToChildrenList($$, $7);
+        appendToChildrenList($$, $10);
+      }
+    | exp PLUS exp
      {$$ = newAST(PLUS_EXPR, NULL, 0, NULL, yylineno);
       appendToChildrenList($$, $1);
       appendToChildrenList($$, $3);}

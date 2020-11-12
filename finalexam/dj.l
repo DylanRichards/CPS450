@@ -21,6 +21,7 @@ readNat {return scanned(READNAT);}
 if {return scanned(IF);}
 else {return scanned(ELSE);}
 while {return scanned(WHILE);}
+for {return scanned(FOR);}
 null {return scanned(NUL);}
 "{" {return scanned(LBRACE);}
 "}" {return scanned(RBRACE);}
@@ -35,6 +36,8 @@ null {return scanned(NUL);}
 "*"  {return scanned(TIMES);}
 "==" {return scanned(EQUALITY);}
 "<"  {return scanned(LESS);}
+"++" {return scanned(INCREMENT);}
+"--" {return scanned(DECREMENT);}
 {digit}  {return scanned(NATLITERAL);}
 {id}  {return scanned(ID);}
 
@@ -51,6 +54,9 @@ null {return scanned(NUL);}
 Token scanned(Token t) {
   if(DEBUG==0) return t;
   switch(t) {
+    case INCREMENT: printf("INCREMENT "); return t;
+    case DECREMENT: printf("DECREMENT "); return t;
+    case FOR: printf("FOR "); return t;
     case MAIN: printf("MAIN "); return t;
     case NATTYPE: printf("NATTYPE "); return t;
     case PRINTNAT: printf("PRINTNAT "); return t;

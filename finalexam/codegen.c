@@ -68,6 +68,59 @@ void decSP() {
 void codeGenExpr(ASTree *t) {
 	if (t->typ == EXPR_LIST) {
 		codeGenExprs(t);
+	} else if (t->typ == INCREMENT_EXPR) {
+        int i;
+        for(i=0; i<numMainBlockLocals;i++){
+            VarDecl *VarDecl = &mainBlockST[i];
+            if(strcmp(VarDecl->varName, t->children->data->idVal)==0){
+                appendCode("R1 = numMainBlockLocals", "%s 1 %d", MOVE, numMainBlockLocals);
+                appendCode("R2 = i", "%s 2 %d", MOVE, i);
+                appendCode("R1=R1-R2", "%s 1 1 2", SUB);
+                appendCode("R1(Address)  = FP+R1", "%s 1 1 7", ADD);
+                break;
+            }
+        }
+        // R1 holds the address of the variable
+        // load it into R2
+        appendCode("R2 <- M[R1]", "%s 2 1 0", LOAD);
+        appendCode("R3 = 1", "%s 3 1", MOVE);
+        appendCode("R2 = R2 + R3", "%s 2 2 3", ADD);
+        appendCode("M[R1] = R2", "%s 1 0 2", STORE);
+        appendCode("M[SP] <- R2", "%s 6 0 2", STORE);
+        decSP();
+	} else if (t->typ == DECREMENT_EXPR) {
+        int i;
+        for(i=0; i<numMainBlockLocals;i++){
+            VarDecl *VarDecl = &mainBlockST[i];
+            if(strcmp(VarDecl->varName, t->children->data->idVal)==0){
+                appendCode("R1 = numMainBlockLocals", "%s 1 %d", MOVE, numMainBlockLocals);
+                appendCode("R2 = i", "%s 2 %d", MOVE, i);
+                appendCode("R1=R1-R2", "%s 1 1 2", SUB);
+                appendCode("R1(Address)  = FP+R1", "%s 1 1 7", ADD);
+                break;
+            }
+        }
+        // R1 holds the address of the variable
+        // load it into R2
+        appendCode("R2 <- M[R1]", "%s 2 1 0", LOAD);
+        appendCode("R3 = 1", "%s 3 1", MOVE);
+        appendCode("R2 = R2 - R3", "%s 2 2 3", SUB);
+        appendCode("M[R1] = R2", "%s 1 0 2", STORE);
+        appendCode("M[SP] <- R2", "%s 6 0 2", STORE);
+        decSP();
+	} else if (t->typ == FOR_EXPR) {
+        codeGenExpr(t->children->data);
+
+        int forLoopLabel = labelNumber++;
+		appendCode("Begin for loop", "#%d: %s 0 0", forLoopLabel, MOVE);
+		codeGenExpr(t->children->next->data);
+		int exitBranchLabel = labelNumber++;
+		appendCode("R1 <- M[SP+1]", "%s 1 6 1", LOAD);
+		appendCode("branch R1 == R0", "%s 1 0 #%d", BEQ, exitBranchLabel);
+        codeGenExpr(t->children->next->next->next->data);
+		codeGenExpr(t->children->next->next->data);
+		appendCode("jump beginning for loop", "%s 0 #%d", JUMP, forLoopLabel);
+		appendCode("exit branch", "#%d: %s 0 0", exitBranchLabel, MOVE);
 	} else if (t->typ == NAT_LITERAL_EXPR) {
         appendCode("R[1] <- natValue", "%s 1 %d", MOVE, t->natVal);
 		appendCode("M[SP] <- R[r1] (a nat literal)", "%s 6 0 1", STORE);

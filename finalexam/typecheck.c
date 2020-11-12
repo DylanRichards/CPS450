@@ -74,6 +74,39 @@ int typeExpr(ASTree *t) {
 	if (t->typ == EXPR_LIST) {
         // if the current note is an expre_list, then recursively call typeExprs function to check its children
 		return typeExprs(t);
+	} else if (t->typ == INCREMENT_EXPR) {
+        // level 1
+        int t1 = typeExpr(t->children->data);
+
+        // for increment operation, the operand must be nat type, otherwise, print an error message
+        if (t1 != NAT_TYPE) {
+            printSemanticError("non-nat type in INCREMENT_EXPR", t->lineNumber);
+        }
+        
+        return NAT_TYPE;
+	} else if (t->typ == DECREMENT_EXPR) {
+        // level 1
+		int t1 = typeExpr(t->children->data);
+
+        // for decrement operation, the operand must be nat type, otherwise, print an error message
+        if (t1 != NAT_TYPE) {
+            printSemanticError("non-nat type in DECREMENT_EXPR", t->lineNumber);
+        }
+        
+        return NAT_TYPE;
+	} else if (t->typ == FOR_EXPR) {
+        // level 1
+		int t1 = typeExpr(t->children->data);
+        int t2 = typeExpr(t->children->next->data);
+        int t3 = typeExpr(t->children->next->next->data);
+        typeExpr(t->children->next->next->next->data);
+
+        // for the for operation, the operands must be nat type, otherwise, print an error message
+        if (t1 != NAT_TYPE || t2 != NAT_TYPE || t3 != NAT_TYPE) {
+            printSemanticError("non-nat type in FOR_EXPR", t->lineNumber);
+        }
+        
+        return NAT_TYPE;
 	} else if (t->typ == NAT_LITERAL_EXPR) {
         // level 1
 		return NAT_TYPE;

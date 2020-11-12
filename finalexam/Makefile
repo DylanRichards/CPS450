@@ -19,4 +19,4 @@ lex.yy.c: dj.l
 
 .PHONY: clean
 clean:
-	$(RM) dj2sim lex.yy.c dj.tab.c dj.output
+	$(RM) dj2sim lex.yy.c dj.tab.c dj.output *.dism
